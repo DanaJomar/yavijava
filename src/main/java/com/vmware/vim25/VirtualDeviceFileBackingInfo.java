@@ -39,6 +39,92 @@ public class VirtualDeviceFileBackingInfo extends VirtualDeviceBackingInfo {
     public String fileName;
     public ManagedObjectReference datastore;
     public String backingObjectId;
+    public String changeID;
+    public String compatibilityMode;
+    public String contentID;
+    public String deltaDiskFormatVariant;
+    public String deltaDiskFormat;
+    public Integer deltaGrainSize;
+    public String deviceName;
+    public String diskMode;
+    public String lunUuid;
+    public VirtualDeviceFileBackingInfo parent;
+    public String sharing;
+    public String uuid;
+    public Boolean writeThrough;
+    public Boolean thinProvisioned;
+    public Boolean split;
+    public Boolean eagerlyScrub;
+    public Boolean digestEnabled;
+
+
+    public String getDeltaDiskFormatVariant() {
+        return deltaDiskFormatVariant;
+    }
+
+    public Boolean getWriteThrough() {
+        return writeThrough;
+    }
+
+    public Boolean getThinProvisioned() {
+        return thinProvisioned;
+    }
+
+    public Boolean getSplit() {
+        return split;
+    }
+
+    public Boolean getEagerlyScrub() {
+        return eagerlyScrub;
+    }
+
+    public Boolean getDigestEnabled() {
+        return digestEnabled;
+    }
+
+    public String getChangeID() {
+        return this.changeID;
+    }
+
+    public String getCompatibilityMode() {
+        return this.compatibilityMode;
+    }
+
+    public String getContentID() {
+        return this.contentID;
+    }
+
+    public String getDeltaDiskFormat() {
+        return this.deltaDiskFormat;
+    }
+
+    public Integer getDeltaGrainSize() {
+        return this.deltaGrainSize;
+    }
+
+    public String getDeviceName() {
+        return this.deviceName;
+    }
+
+    public String getDiskMode() {
+        return this.diskMode;
+    }
+
+    public String getLunUuid() {
+        return this.lunUuid;
+    }
+
+    public VirtualDeviceFileBackingInfo getParent() {
+        return this.parent;
+    }
+
+    public String getSharing() {
+        return this.sharing;
+    }
+
+    public String getUuid() {
+        return this.uuid;
+    }
 
     public String getFileName() {
         return this.fileName;
