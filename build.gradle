@@ -10,8 +10,8 @@ group = "com.toastcoders"
 archivesBaseName = "yavijava"
 version = '6.0.05'
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
-targetCompatibility = 1.6
-sourceCompatibility = 1.6
+targetCompatibility = 1.8
+sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
@@ -61,7 +61,7 @@ configurations {
     intTestRuntime.extendsFrom testRuntime
 }
 
-task intTest(type:Test){
+task intTest(type: Test) {
     description = "Run integration tests (located in src/intTest/...)."
     testClassesDirs = project.sourceSets.intTest.output.classesDirs
     classpath = project.sourceSets.intTest.runtimeClasspath
