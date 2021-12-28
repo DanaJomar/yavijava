@@ -3,15 +3,14 @@ language: java
 sudo: false
 
 jdk:
-- oraclejdk8
-- openjdk7
-- openjdk8
+  - openjdk7
+  - openjdk8
 
 script:
-- gradle test
+  - gradle test
 
 install:
-- /bin/true
+  - /bin/true
 
 notifications:
   webhooks:
