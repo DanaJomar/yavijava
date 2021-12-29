@@ -92,6 +92,8 @@ task completeJar(type: Jar) {
         configurations.compile.collect {
             it.isDirectory() ? it : zipTree(it)
         }
+    }{
+        exclude "**/Log4j2Plugins.dat"
     }
     with jar
 }
