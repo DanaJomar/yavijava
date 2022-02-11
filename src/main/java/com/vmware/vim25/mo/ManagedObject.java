@@ -32,7 +32,7 @@ package com.vmware.vim25.mo;
 import com.vmware.vim25.*;
 import com.vmware.vim25.mo.util.MorUtil;
 import com.vmware.vim25.mo.util.PropertyCollectorUtil;
-import org.apache.log4j.Logger;
+import com.vmware.vim25.util.log.Logger;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -51,11 +51,6 @@ import java.util.Hashtable;
 
 abstract public class ManagedObject {
     private static String MO_PACKAGE_NAME = null;
-
-    /**
-     * Create Logger
-     */
-    private static Logger log = Logger.getLogger(ManagedObject.class);
 
     static {
         MO_PACKAGE_NAME = ManagedObject.class.getPackage().getName();
@@ -236,7 +231,7 @@ abstract public class ManagedObject {
             }
         }
         catch (Exception e) {
-            log.error("Exception caught trying to getManagedObjects.", e);
+            Logger.error("VMWareAPI", "Exception caught trying to getManagedObjects: " + e.getMessage());
         }
 
         return (ManagedObject[]) mos;

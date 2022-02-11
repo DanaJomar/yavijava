@@ -32,7 +32,7 @@ package com.vmware.vim25.ws;
 
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.mo.util.MorUtil;
-import org.apache.log4j.Logger;
+import com.vmware.vim25.util.log.Logger;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
@@ -58,7 +58,6 @@ import java.util.List;
  */
 
 class XmlGenDom extends XmlGen {
-    private static Logger log = Logger.getLogger(XmlGenDom.class);
 
     protected static int getNumberOfSameTags(List<Element> subNodes, int sizeOfSubNodes, int from, String tagName) {
         int numOfTags = 1;
@@ -74,14 +73,12 @@ class XmlGenDom extends XmlGen {
     }
 
     public Object fromXML(String returnType, InputStream is) throws RemoteException {
-        log.debug("Parsing XML payload from server. " + returnType);
+        // Logger.debug("VMWareAPI", "Parsing XML payload from server. " + returnType);
         Element root = null;
         try {
             SAXReader reader = new SAXReader();
             Document doc = reader.read(is);
-            if(log.isTraceEnabled()) {
-                log.trace("XML Document: " + doc.asXML());
-            }
+            // Logger.debug("VMWareAPI", "XML Document: " + doc.asXML());
             root = doc.getRootElement();
         }
         catch (DocumentException e){
@@ -174,10 +171,10 @@ class XmlGenDom extends XmlGen {
             } catch (NoSuchFieldException e) {
                 current = current.getSuperclass();
             } catch (IllegalAccessException e) {
-                log.info("The fault string: \"" + detailMessage + "\", was unable to be set in exception due to: ", e);
+                Logger.info("VMWareAPI", "The fault string: \"" + detailMessage + "\", was unable to be set in exception due to: " + e.getMessage());
                 return obj;
             } catch (AccessControlException e) {
-                log.info("The fault string: \"" + detailMessage + "\", was unable to be set in exception due to: ", e);
+                Logger.info("VMWareAPI", "The fault string: \"" + detailMessage + "\", was unable to be set in exception due to: " + e.getMessage());
                 return obj;
             }
         }
@@ -239,7 +236,7 @@ class XmlGenDom extends XmlGen {
             if(vimClass != null) {
                 return fromXml(vimClass, subNodes.get(0));
             } else {
-                log.error("Vim class not found for type: " + type + ", XML Document: " + subNodes.get(0).asXML());
+                Logger.error("VMWareAPI", "Vim class not found for type: " + type + ", XML Document: " + subNodes.get(0).asXML());
                 return null;
             }
         }

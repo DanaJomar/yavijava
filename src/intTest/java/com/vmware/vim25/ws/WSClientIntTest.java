@@ -9,7 +9,6 @@ import java.util.Calendar;
 
 import javax.net.ssl.*;
 
-import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,8 +24,6 @@ import com.vmware.vim25.mo.ServiceInstance;
 import com.vmware.vim25.mo.util.PropertyCollectorUtil;
 
 public class WSClientIntTest {
-
-    private static final Logger log = Logger.getLogger(WSClientIntTest.class);
 
     /**
      * Counter for created factory in {@link CustomWSClient}.

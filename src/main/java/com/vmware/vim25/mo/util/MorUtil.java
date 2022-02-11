@@ -33,7 +33,6 @@ import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.mo.ManagedEntity;
 import com.vmware.vim25.mo.ManagedObject;
 import com.vmware.vim25.mo.ServerConnection;
-import org.apache.log4j.Logger;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -50,11 +49,6 @@ public class MorUtil {
      * Package name used for class generation
      */
     final public static String moPackageName = "com.vmware.vim25.mo";
-
-    /**
-     * Create a logger
-     */
-    private static Logger log = Logger.getLogger(MorUtil.class);
 
     /**
      * Takes an array of ManagedObjects and returns the MOR for each MO

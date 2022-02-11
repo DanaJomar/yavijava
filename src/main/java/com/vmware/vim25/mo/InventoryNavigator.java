@@ -3,15 +3,13 @@ package com.vmware.vim25.mo;
 import com.vmware.vim25.*;
 import com.vmware.vim25.mo.util.MorUtil;
 import com.vmware.vim25.mo.util.PropertyCollectorUtil;
-import org.apache.log4j.Logger;
+import com.vmware.vim25.util.log.Logger;
 
 import java.rmi.RemoteException;
 
 public class InventoryNavigator {
     private ManagedEntity rootEntity = null;
     private SelectionSpec[] selectionSpecs = null;
-
-    private static Logger log = Logger.getLogger(InventoryNavigator.class);
 
     public InventoryNavigator(ManagedEntity rootEntity) {
         this.rootEntity = rootEntity;
@@ -80,11 +78,11 @@ public class InventoryNavigator {
                 majorVersion = 0;
             }
             if (majorVersion >= 4) {
-                log.debug("API version >= 4 detected. Using buildFullTraversalV4.");
+//                Logger.debug("VMWareAPI", "API version >= 4 detected. Using buildFullTraversalV4.");
                 selectionSpecs = PropertyCollectorUtil.buildFullTraversalV4();
             }
             else {
-                log.debug("API version < 4 detected. Using buildFullTraversal");
+//                Logger.debug("VMWareAPI", "API version < 4 detected. Using buildFullTraversal");
                 selectionSpecs = PropertyCollectorUtil.buildFullTraversal();
             }
         }

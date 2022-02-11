@@ -32,7 +32,7 @@ package com.vmware.vim25.ws;
 
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.mo.util.MorUtil;
-import org.apache.log4j.Logger;
+import com.vmware.vim25.util.log.Logger;
 import org.doublecloud.ws.util.ReflectUtil;
 import org.doublecloud.ws.util.TypeUtil;
 import org.doublecloud.ws.util.XmlUtil;
@@ -44,8 +44,6 @@ import java.lang.reflect.Modifier;
 import java.util.Calendar;
 
 public abstract class XmlGen {
-
-    private static Logger log = Logger.getLogger(XmlGen.class);
 
     public static String toXML(String methodName, Argument[] paras, String vimNameSpace) {
         StringBuilder sb = new StringBuilder();
@@ -172,7 +170,7 @@ public abstract class XmlGen {
                         value = f.get(obj);
                     }
                     catch (IllegalAccessException iae) {
-                        log.error("IllegalAccessException caught.", iae);
+                        Logger.error("VMWareAPI", "IllegalAccessException caught. " + iae.getMessage());
                     }
                 }
                 if (value == null) {

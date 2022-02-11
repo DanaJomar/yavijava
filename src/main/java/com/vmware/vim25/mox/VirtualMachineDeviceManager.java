@@ -96,31 +96,22 @@ import com.vmware.vim25.mo.InventoryNavigator;
 import com.vmware.vim25.mo.ServiceInstance;
 import com.vmware.vim25.mo.Task;
 import com.vmware.vim25.mo.VirtualMachine;
-import org.apache.log4j.Logger;
+import com.vmware.vim25.util.log.Logger;
 
 /**
- * VirtualMachineDeviceManager manages the virtual devices in a much
- * simplified way than using the reconfigVM_Task() method defined in
- * VirtualMachine managed object.
+ * VirtualMachineDeviceManager manages the virtual devices in a much simplified way than using the reconfigVM_Task()
+ * method defined in VirtualMachine managed object.
  * <p>
- * Devices it manages include: FloppyDrive, CdDrive, NetworkAdapter, UsbDevice, HardDisk
- * Operations include:
- * create -- create something new
- * add -- add something existing but not yet attached to the virtual machine
- * remove -- remove the device(s) from the virtual machine
- * get -- retrieve the device(s) from the virtual machine
- * update -- update the existing device with new configuration
+ * Devices it manages include: FloppyDrive, CdDrive, NetworkAdapter, UsbDevice, HardDisk Operations include: create --
+ * create something new add -- add something existing but not yet attached to the virtual machine remove -- remove the
+ * device(s) from the virtual machine get -- retrieve the device(s) from the virtual machine update -- update the
+ * existing device with new configuration
  *
  * @author Steve Jin (http://www.doublecloud.org)
  */
 
 public class VirtualMachineDeviceManager {
     private VirtualMachine vm;
-
-    /**
-     * Create a logger
-     */
-    private static Logger log = Logger.getLogger(VirtualMachineDeviceManager.class);
 
     public VirtualMachineDeviceManager(VirtualMachine vm) {
         this.vm = vm;
@@ -137,22 +128,31 @@ public class VirtualMachineDeviceManager {
     /**
      * @param floppyImagePath - i.e. "[storage1] myVM/myFloppy.flp" Note: there is a space after ].
      */
-    public Task addFloppyDriveFromISO(String floppyImagePath, boolean startConnected) throws InvalidName, VmConfigFault, DuplicateName, TaskInProgress, FileFault, InvalidState, ConcurrentAccess, InvalidDatastore, InsufficientResourcesFault, RuntimeFault, RemoteException {
+    public Task addFloppyDriveFromISO(String floppyImagePath, boolean startConnected)
+            throws InvalidName, VmConfigFault, DuplicateName, TaskInProgress, FileFault, InvalidState, ConcurrentAccess,
+            InvalidDatastore, InsufficientResourcesFault, RuntimeFault, RemoteException {
         return addFloppyDrive(floppyImagePath, null, null, startConnected);
     }
 
     /**
      * @param hostDevice - i.e. "/dev/fd0"
      */
-    public Task addFloppyDriveFromHost(String hostDevice, boolean startConnected) throws InvalidName, VmConfigFault, DuplicateName, TaskInProgress, FileFault, InvalidState, ConcurrentAccess, InvalidDatastore, InsufficientResourcesFault, RuntimeFault, RemoteException {
+    public Task addFloppyDriveFromHost(String hostDevice, boolean startConnected)
+            throws InvalidName, VmConfigFault, DuplicateName, TaskInProgress, FileFault, InvalidState, ConcurrentAccess,
+            InvalidDatastore, InsufficientResourcesFault, RuntimeFault, RemoteException {
         return addFloppyDrive(null, null, hostDevice, startConnected);
     }
 
-    public Task createFloppyDrive(String floppyImagePath, boolean startConnected) throws InvalidName, VmConfigFault, DuplicateName, TaskInProgress, FileFault, InvalidState, ConcurrentAccess, InvalidDatastore, InsufficientResourcesFault, RuntimeFault, RemoteException {
+    public Task createFloppyDrive(String floppyImagePath, boolean startConnected)
+            throws InvalidName, VmConfigFault, DuplicateName, TaskInProgress, FileFault, InvalidState, ConcurrentAccess,
+            InvalidDatastore, InsufficientResourcesFault, RuntimeFault, RemoteException {
         return addFloppyDrive(null, floppyImagePath, null, startConnected);
     }
 
-    private Task addFloppyDrive(String floppyImagePath, String newFloppyImagePath, String hostDevice, boolean startConnected) throws InvalidName, VmConfigFault, DuplicateName, TaskInProgress, FileFault, InvalidState, ConcurrentAccess, InvalidDatastore, InsufficientResourcesFault, RuntimeFault, RemoteException {
+    private Task addFloppyDrive(String floppyImagePath, String newFloppyImagePath, String hostDevice,
+                                boolean startConnected)
+            throws InvalidName, VmConfigFault, DuplicateName, TaskInProgress, FileFault, InvalidState, ConcurrentAccess,
+            InvalidDatastore, InsufficientResourcesFault, RuntimeFault, RemoteException {
         // Any VM associated with the device must be powered off.
         if (vm.getRuntime().getPowerState() == VirtualMachinePowerState.poweredOff) {
             throw new RuntimeException("Invalid power state: power off this VM before adding a floppy drive.");
@@ -166,18 +166,15 @@ public class VirtualMachineDeviceManager {
             VirtualFloppyDeviceBackingInfo backing = new VirtualFloppyDeviceBackingInfo();
             backing.deviceName = hostDevice;
             floppy.backing = backing;
-        }
-        else if (floppyImagePath != null) {
+        } else if (floppyImagePath != null) {
             VirtualFloppyImageBackingInfo backing = new VirtualFloppyImageBackingInfo();
             backing.fileName = floppyImagePath;
             floppy.backing = backing;
-        }
-        else if (newFloppyImagePath != null) {
+        } else if (newFloppyImagePath != null) {
             VirtualFloppyImageBackingInfo backing = new VirtualFloppyImageBackingInfo();
             backing.fileName = newFloppyImagePath;
             floppy.backing = backing;
-        }
-        else {
+        } else {
             // The VIM API doesn't allow for the possibility of adding a drive
             // without hooking it up to something. In an ideal world, I'd probably
             // want an ISO backing without having to specify a valid ISO at this
@@ -206,8 +203,7 @@ public class VirtualMachineDeviceManager {
 
         if (controller != null) {
             config.deviceChange[0].device.controllerKey = controller.key;
-        }
-        else {
+        } else {
             throw new RuntimeException("No available IDE controller for floppy drive.");
         }
 
@@ -235,15 +231,18 @@ public class VirtualMachineDeviceManager {
     /*############################################################
     CD/DVC Drive Management
     ############################################################*/
-    public Task addCdDriveFromIso(String isoPath, boolean startConnected) throws InvalidProperty, RuntimeFault, RemoteException, InterruptedException {
+    public Task addCdDriveFromIso(String isoPath, boolean startConnected)
+            throws InvalidProperty, RuntimeFault, RemoteException, InterruptedException {
         return addCdDrive(isoPath, null, startConnected);
     }
 
-    public Task addCdDriveFromHost(String hostDevice, boolean startConnected) throws InvalidProperty, RuntimeFault, RemoteException, InterruptedException {
+    public Task addCdDriveFromHost(String hostDevice, boolean startConnected)
+            throws InvalidProperty, RuntimeFault, RemoteException, InterruptedException {
         return addCdDrive(null, hostDevice, startConnected);
     }
 
-    private Task addCdDrive(String isoPath, String hostDevice, boolean startConnected) throws InvalidProperty, RuntimeFault, RemoteException, InterruptedException {
+    private Task addCdDrive(String isoPath, String hostDevice, boolean startConnected)
+            throws InvalidProperty, RuntimeFault, RemoteException, InterruptedException {
         VirtualMachinePowerState powerState = vm.getRuntime().getPowerState();
         if (powerState != VirtualMachinePowerState.poweredOff) {
             throw new RuntimeException("VM is not yet powered off for adding a CD drive.");
@@ -259,13 +258,11 @@ public class VirtualMachineDeviceManager {
             VirtualCdromAtapiBackingInfo backing = new VirtualCdromAtapiBackingInfo();
             backing.deviceName = hostDevice;
             cdrom.backing = backing;
-        }
-        else if (isoPath != null) {
+        } else if (isoPath != null) {
             VirtualCdromIsoBackingInfo backing = new VirtualCdromIsoBackingInfo();
             backing.fileName = isoPath;
             cdrom.backing = backing;
-        }
-        else {
+        } else {
             // We don't allow adding a CD drive without hooking it up to something.
             // In an ideal world, you may want an ISO backing without having to specify a valid ISO
             // at this time. Create a remote passthrough backing and just set it as not connected.
@@ -288,8 +285,7 @@ public class VirtualMachineDeviceManager {
 
         if (controller != null) {
             config.deviceChange[0].device.controllerKey = controller.key;
-        }
-        else {
+        } else {
             throw new RuntimeException("No free IDE controller for addtional CD Drive.");
         }
 
@@ -314,8 +310,7 @@ public class VirtualMachineDeviceManager {
 
         try {
             configTarget = envBrower.queryConfigTarget(null);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             throw new RuntimeException("Error in getting Cdrom devices from host.");
         }
 
@@ -443,10 +438,11 @@ public class VirtualMachineDeviceManager {
   ############################################################*/
 
     /**
-     * Create a new virtual network adapter on the VM
-     * Your MAC address should start with 00:50:56
+     * Create a new virtual network adapter on the VM Your MAC address should start with 00:50:56
      */
-    public void createNetworkAdapter(VirtualNetworkAdapterType type, String networkName, String macAddress, boolean wakeOnLan, boolean startConnected) throws InvalidProperty, RuntimeFault, RemoteException, InterruptedException {
+    public void createNetworkAdapter(VirtualNetworkAdapterType type, String networkName, String macAddress,
+                                     boolean wakeOnLan, boolean startConnected)
+            throws InvalidProperty, RuntimeFault, RemoteException, InterruptedException {
         VirtualMachinePowerState powerState = vm.getRuntime().getPowerState();
         String vmVerStr = vm.getConfig().getVersion();
         int vmVer = Integer.parseInt(vmVerStr.substring(vmVerStr.length() - 2));
@@ -463,7 +459,8 @@ public class VirtualMachineDeviceManager {
 
         type = validateNicType(vmCfgOpt.getGuestOSDescriptor(), vm.getConfig().getGuestId(), type);
 
-        VirtualDeviceConfigSpec nicSpec = createNicSpec(type, networkName, macAddress, wakeOnLan, startConnected, configTarget);
+        VirtualDeviceConfigSpec nicSpec =
+                createNicSpec(type, networkName, macAddress, wakeOnLan, startConnected, configTarget);
 
         VirtualMachineConfigSpec vmConfigSpec = new VirtualMachineConfigSpec();
         vmConfigSpec.setDeviceChange(new VirtualDeviceConfigSpec[]{nicSpec});
@@ -472,7 +469,9 @@ public class VirtualMachineDeviceManager {
         task.waitForTask(200, 100);
     }
 
-    private VirtualDeviceConfigSpec createNicSpec(VirtualNetworkAdapterType adapterType, String networkName, String macAddress, boolean wakeOnLan, boolean startConnected, ConfigTarget configTarget) {
+    private VirtualDeviceConfigSpec createNicSpec(VirtualNetworkAdapterType adapterType, String networkName,
+                                                  String macAddress, boolean wakeOnLan, boolean startConnected,
+                                                  ConfigTarget configTarget) {
         VirtualDeviceConfigSpec result = null;
         DistributedVirtualPortgroupInfo dvPortgroupInfo = null;
 
@@ -483,15 +482,15 @@ public class VirtualMachineDeviceManager {
 
         if (dvPortgroupInfo != null) {
             validateDVPortGroupForVNicConnection(dvPortgroupInfo);
-            VirtualEthernetCardDistributedVirtualPortBackingInfo nicBacking = new VirtualEthernetCardDistributedVirtualPortBackingInfo();
+            VirtualEthernetCardDistributedVirtualPortBackingInfo nicBacking =
+                    new VirtualEthernetCardDistributedVirtualPortBackingInfo();
             nicBacking.port = new DistributedVirtualSwitchPortConnection();
             nicBacking.port.portgroupKey = dvPortgroupInfo.portgroupKey;
             nicBacking.port.switchUuid = dvPortgroupInfo.switchUuid;
             result = createNicSpec(adapterType, macAddress, wakeOnLan, startConnected, nicBacking);
-        }
-        else {
+        } else {
             NetworkSummary netSummary = getHostNetworkSummaryByName(
-                networkName, configTarget.network);
+                    networkName, configTarget.network);
             VirtualEthernetCardNetworkBackingInfo nicBacking = new VirtualEthernetCardNetworkBackingInfo();
             nicBacking.network = netSummary.network;
             nicBacking.deviceName = netSummary.name;
@@ -506,18 +505,20 @@ public class VirtualMachineDeviceManager {
             throw new RuntimeException("The vDS portgroup's uplinkPortgroup should not be null");
         }
 
-        DistributedVirtualPortgroupPortgroupType portgroupType = DistributedVirtualPortgroupPortgroupType.valueOf(dvPortgroupInfo.portgroupType);
+        DistributedVirtualPortgroupPortgroupType portgroupType =
+                DistributedVirtualPortgroupPortgroupType.valueOf(dvPortgroupInfo.portgroupType);
 
         String prodLineId = vm.getServerConnection().getServiceInstance().getAboutInfo().getProductLineId();
         // standalone host cannot do early or late binding
         if (prodLineId.indexOf("ESX") != -1 &&
-            (portgroupType == DistributedVirtualPortgroupPortgroupType.earlyBinding ||
-                portgroupType == DistributedVirtualPortgroupPortgroupType.lateBinding)) {
+                (portgroupType == DistributedVirtualPortgroupPortgroupType.earlyBinding ||
+                        portgroupType == DistributedVirtualPortgroupPortgroupType.lateBinding)) {
             throw new RuntimeException("ESX does not support early or late binding!");
         }
     }
 
-    private static NetworkSummary getHostNetworkSummaryByName(String networkName, VirtualMachineNetworkInfo[] hostNetworkList) {
+    private static NetworkSummary getHostNetworkSummaryByName(String networkName,
+                                                              VirtualMachineNetworkInfo[] hostNetworkList) {
         NetworkSummary result = null;
         boolean isNetworkExistingOnHost = false;
 
@@ -529,8 +530,7 @@ public class VirtualMachineDeviceManager {
                 if (netInfo.network.accessible) {
                     result = netInfo.network;
                     break;
-                }
-                else {
+                } else {
                     throw new RuntimeException("Network: " + networkName + " is not accessible.");
                 }
             }
@@ -541,8 +541,9 @@ public class VirtualMachineDeviceManager {
         return result;
     }
 
-    private static DistributedVirtualPortgroupInfo findDVPortgroupInfo(DistributedVirtualPortgroupInfo[] hostDistributedVirtualPortgroupInfo,
-                                                                       String portgroupName) {
+    private static DistributedVirtualPortgroupInfo findDVPortgroupInfo(
+            DistributedVirtualPortgroupInfo[] hostDistributedVirtualPortgroupInfo,
+            String portgroupName) {
         DistributedVirtualPortgroupInfo result = null;
 
         if (hostDistributedVirtualPortgroupInfo != null) {
@@ -556,7 +557,9 @@ public class VirtualMachineDeviceManager {
         return result;
     }
 
-    private static VirtualDeviceConfigSpec createNicSpec(VirtualNetworkAdapterType adapterType, String macAddress, boolean wakeOnLan, boolean startConnected, VirtualDeviceBackingInfo nicBacking) {
+    private static VirtualDeviceConfigSpec createNicSpec(VirtualNetworkAdapterType adapterType, String macAddress,
+                                                         boolean wakeOnLan, boolean startConnected,
+                                                         VirtualDeviceBackingInfo nicBacking) {
         VirtualDeviceConfigSpec result = new VirtualDeviceConfigSpec();
 
         VirtualEthernetCard device;
@@ -583,8 +586,7 @@ public class VirtualMachineDeviceManager {
 
         if (macAddress == null) {
             device.addressType = "generated";
-        }
-        else {
+        } else {
             device.addressType = "manual";
             device.macAddress = macAddress;
         }
@@ -604,7 +606,8 @@ public class VirtualMachineDeviceManager {
 
     // Check network adapter type if it's supported by the guest OS
     private static VirtualNetworkAdapterType validateNicType(GuestOsDescriptor[] guestOsDescriptorList,
-                                                             String guestId, VirtualNetworkAdapterType adapterType) throws DeviceNotSupported {
+                                                             String guestId, VirtualNetworkAdapterType adapterType)
+            throws DeviceNotSupported {
         VirtualNetworkAdapterType result = adapterType;
 
         GuestOsDescriptor guestOsInfo = null;
@@ -618,14 +621,14 @@ public class VirtualMachineDeviceManager {
 
         if (adapterType == VirtualNetworkAdapterType.Unknown) {
             result = TryGetNetworkAdapterType(guestOsInfo);
-        }
-        else {
+        } else {
             if (guestOsInfo.getSupportedEthernetCard() != null) {
                 boolean supported = false;
                 List<String> supportedTypeList = new ArrayList<String>();
 
                 for (String supportedAdapterName : guestOsInfo.getSupportedEthernetCard()) {
-                    VirtualNetworkAdapterType supportedAdapterType = GetNetworkAdapterTypeByApiType(supportedAdapterName);
+                    VirtualNetworkAdapterType supportedAdapterType =
+                            GetNetworkAdapterTypeByApiType(supportedAdapterName);
                     supportedTypeList.add(supportedAdapterType.toString());
 
                     if (supportedAdapterType == adapterType) {
@@ -650,8 +653,8 @@ public class VirtualMachineDeviceManager {
         String ethernetCardType = guestOsInfo.getRecommendedEthernetCard();
 
         if ((ethernetCardType == null || ethernetCardType.isEmpty()) &&
-            (guestOsInfo.getSupportedEthernetCard() != null) &&
-            ((guestOsInfo.getSupportedEthernetCard().length > 0))) {
+                (guestOsInfo.getSupportedEthernetCard() != null) &&
+                ((guestOsInfo.getSupportedEthernetCard().length > 0))) {
             ethernetCardType = guestOsInfo.getSupportedEthernetCard()[0];
         }
         return GetNetworkAdapterTypeByApiType(ethernetCardType);
@@ -667,10 +670,12 @@ public class VirtualMachineDeviceManager {
   ############################################################*/
 
     /**
-     * Remove the device. Make sure the VM is powered off before calling this method.
-     * If destroyDeviceBacking is true, it deletes backings for example files in datastore. BE CAREFUL!
+     * Remove the device. Make sure the VM is powered off before calling this method. If destroyDeviceBacking is true,
+     * it deletes backings for example files in datastore. BE CAREFUL!
      */
-    public Task removeDevice(VirtualDevice device, boolean destroyDeviceBacking) throws InvalidName, VmConfigFault, DuplicateName, TaskInProgress, FileFault, InvalidState, ConcurrentAccess, InvalidDatastore, InsufficientResourcesFault, RuntimeFault, RemoteException {
+    public Task removeDevice(VirtualDevice device, boolean destroyDeviceBacking)
+            throws InvalidName, VmConfigFault, DuplicateName, TaskInProgress, FileFault, InvalidState, ConcurrentAccess,
+            InvalidDatastore, InsufficientResourcesFault, RuntimeFault, RemoteException {
         ArrayList<VirtualDevice> deviceList = new ArrayList<VirtualDevice>();
         deviceList.add(device);
         return removeDevices(deviceList, destroyDeviceBacking);
@@ -678,11 +683,13 @@ public class VirtualMachineDeviceManager {
 
 
     /**
-     * Remove all devices as listed in the deviceList. These devices can be different types.
-     * Make sure the VM is powered off before calling this method.
-     * If destroyDeviceBacking is true, it deletes backings for example files in datastore. BE CAREFUL!
+     * Remove all devices as listed in the deviceList. These devices can be different types. Make sure the VM is powered
+     * off before calling this method. If destroyDeviceBacking is true, it deletes backings for example files in
+     * datastore. BE CAREFUL!
      */
-    public Task removeDevices(List<VirtualDevice> deviceList, boolean destroyDeviceBacking) throws InvalidName, VmConfigFault, DuplicateName, TaskInProgress, FileFault, InvalidState, ConcurrentAccess, InvalidDatastore, InsufficientResourcesFault, RuntimeFault, RemoteException {
+    public Task removeDevices(List<VirtualDevice> deviceList, boolean destroyDeviceBacking)
+            throws InvalidName, VmConfigFault, DuplicateName, TaskInProgress, FileFault, InvalidState, ConcurrentAccess,
+            InvalidDatastore, InsufficientResourcesFault, RuntimeFault, RemoteException {
         List<VirtualDeviceConfigSpec> configSpecList = new ArrayList<VirtualDeviceConfigSpec>();
 
         boolean allDevicesSupportHotRemoval = allSupportHotRemoval(deviceList);
@@ -739,8 +746,7 @@ public class VirtualMachineDeviceManager {
                 }
 
                 configSpecList.add(deviceSpec);
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         }
@@ -817,12 +823,10 @@ public class VirtualMachineDeviceManager {
         VirtualController vc = null;
         try {
             vc = (T) clazz.newInstance();
-        }
-        catch (InstantiationException e) {
-            log.error("Unable to createControllerInstance.", e);
-        }
-        catch (IllegalAccessException e) {
-            log.error("Unable to createControllerInstance.", e);
+        } catch (InstantiationException e) {
+            Logger.error("VMWareAPI", "Unable to createControllerInstance. " + e.getMessage());
+        } catch (IllegalAccessException e) {
+            Logger.error("VMWareAPI", "Unable to createControllerInstance. " + e.getMessage());
         }
         return vc;
     }
@@ -835,11 +839,9 @@ public class VirtualMachineDeviceManager {
             // but one of them is reserved for the controller itself
             // so this means that the maximum free nodes are 15.
             count = 16;
-        }
-        else if (VirtualIDEController.class.isInstance(controller)) {
+        } else if (VirtualIDEController.class.isInstance(controller)) {
             count = 2;
-        }
-        else {
+        } else {
             throw new RuntimeException("Unknown controller type - " + controller.getDeviceInfo().getLabel());
         }
         return count;

@@ -4,7 +4,7 @@ import com.vmware.vim25.ArrayOfManagedObjectReference
 import com.vmware.vim25.ManagedObjectReference
 import com.vmware.vim25.ObjectSpec
 import com.vmware.vim25.SelectionSpec
-import org.apache.log4j.Logger
+import com.vmware.vim25.util.log.Logger
 import spock.lang.Specification
 
 

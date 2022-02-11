@@ -42,7 +42,7 @@ import com.vmware.vim25.UpdateSet;
 import com.vmware.vim25.mo.ManagedObject;
 import com.vmware.vim25.mo.PropertyCollector;
 import com.vmware.vim25.mo.PropertyFilter;
-import org.apache.log4j.Logger;
+import com.vmware.vim25.util.log.Logger;
 
 /**
  * @author Steve JIN (sjin@vmware.com)
@@ -62,10 +62,6 @@ class ManagedObjectWatcher extends Observable implements Runnable {
      * Version
      */
     private String version = "";
-    /**
-     * Logger
-     */
-    private static Logger log = Logger.getLogger(ManagedObjectWatcher.class);
 
     public ManagedObjectWatcher(PropertyCollector pc) {
         this.pc = pc;
@@ -104,7 +100,7 @@ class ManagedObjectWatcher extends Observable implements Runnable {
             filters.add(pf);
         }
         catch (RemoteException re) {
-            log.error("RemoteException caught trying to watch on a PropertyFilterSpec", re);
+            Logger.error("VMWareAPI", "RemoteException caught trying to watch on a PropertyFilterSpec. " + re.getMessage());
             throw new RuntimeException(re);
         }
     }
@@ -122,11 +118,11 @@ class ManagedObjectWatcher extends Observable implements Runnable {
                 version = update.getVersion();
             }
             catch (NotAuthenticated na) {
-                log.error("NotAuthenticated Exception caught.", na);
+                Logger.error("VMWareAPI", "NotAuthenticated Exception caught. " + na.getMessage());
                 break;
             }
             catch (Exception e) {
-                log.error("Generic Exception caught in run block of ManagedObjectWatcher.", e);
+                Logger.error("VMWareAPI", "Generic Exception caught in run block of ManagedObjectWatcher. " + e.getMessage());
             }
         }
     }
@@ -140,7 +136,7 @@ class ManagedObjectWatcher extends Observable implements Runnable {
                 filter.destroyPropertyFilter();
             }
             catch (RemoteException e) {
-                log.error("RemoteException caught in cleanUp", e);
+                Logger.error("VMWareAPI", "RemoteException caught in cleanUp. " + e.getMessage());
             }
         }
     }

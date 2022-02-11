@@ -1,7 +1,7 @@
 package com.vmware.vim25.util.storage;
 
 import com.vmware.vim25.*;
-import org.apache.log4j.Logger;
+import com.vmware.vim25.util.log.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,11 +11,6 @@ import java.util.Map;
  * Created by zahe1469 on 9/4/2014.
  */
 public class HostStorageDeviceInfoEx {
-
-    /**
-     * Logger to log information.
-     */
-    Logger log = Logger.getLogger(HostStorageDeviceInfoEx.class);
 
     /**
      * Host Storage Device Information.
@@ -66,7 +61,7 @@ public class HostStorageDeviceInfoEx {
 
         // Check to see that this device has luns
         if (storageDeviceInfo.getScsiLun().length == 0) {
-            log.trace("There are no Scsi LUNS on this storage device.");
+//            Logger.debug("VMWareAPI", "There are no Scsi LUNS on this storage device.");
             return;
         }
 
@@ -85,7 +80,7 @@ public class HostStorageDeviceInfoEx {
 
         // Check to see that adapters are present
         if (null == scsiTopology.adapter || scsiTopology.adapter.length == 0) {
-            log.trace("There are no adapters on this storage device.");
+//            Logger.debug("VMWareAPI", "There are no adapters on this storage device.");
             return;
         }
 
@@ -94,7 +89,7 @@ public class HostStorageDeviceInfoEx {
 
             // Check to see that these adapters have targets
             if (null == adapter.target || adapter.target.length == 0) {
-                log.trace("This adapter has no targets. Adapter:" + adapter.adapter);
+//                Logger.debug("VMWareAPI","This adapter has no targets. Adapter:" + adapter.adapter);
                 continue;
             }
 
@@ -103,7 +98,7 @@ public class HostStorageDeviceInfoEx {
 
                 // Check to see that the target has LUNs
                 if (null == target.lun || target.lun.length == 0) {
-                    log.trace("This target has no LUNs on it. Target:" + target.key);
+//                    Logger.debug("VMWareAPI","This target has no LUNs on it. Target:" + target.key);
                     continue;
                 }
 
@@ -125,7 +120,7 @@ public class HostStorageDeviceInfoEx {
 
         // Make sure that information is available.
         if (sortedScsiLuns.size() == 0 || scsiTopologyInfo.size() == 0) {
-            log.trace("There is no SCSI Lun information on this host");
+//            Logger.debug("VMWareAPI", "There is no SCSI Lun information on this host");
             return;
         }
 

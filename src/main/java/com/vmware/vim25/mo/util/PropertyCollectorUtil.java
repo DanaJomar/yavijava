@@ -32,7 +32,7 @@ package com.vmware.vim25.mo.util;
 import com.vmware.vim25.*;
 import com.vmware.vim25.mo.ManagedObject;
 import com.vmware.vim25.mo.PropertyCollector;
-import org.apache.log4j.Logger;
+import com.vmware.vim25.util.log.Logger;
 
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
@@ -48,21 +48,20 @@ import java.util.List;
  */
 public class PropertyCollectorUtil {
 
-    private static Logger log = Logger.getLogger(PropertyCollectorUtil.class);
-
     final public static Object NULL = new Object();
 
     /**
      * Retrieves properties from multiple managed objects.
      *
-     * @param mos       the array of managed objects which could be of single type or mixed types. When they are mix-typed,
-     *                  the moType must be super type of all these managed objects.
+     * @param mos       the array of managed objects which could be of single type or mixed types. When they are
+     *                  mix-typed, the moType must be super type of all these managed objects.
      * @param moType    the type of the managed object. This managed object type must have all the properties defined as
      *                  in propPaths.
-     * @param propPaths the array of property path which has dot as separator, for example, "name", "guest.toolsStatus".
-     * @return an array of Hashtable whose order is the same as the mos array. Each Hashtable has the properties for
-     * one managed object. Note: some of the properties you want to retrieve might not be set, and therefore you don't
-     * have an entry in the Hashtable at all. In other words, it's possible for you to get null for a property from the
+     * @param propPaths the array of property path which has dot as separator, for example, "name",
+     *                  "guest.toolsStatus".
+     * @return an array of Hashtable whose order is the same as the mos array. Each Hashtable has the properties for one
+     * managed object. Note: some of the properties you want to retrieve might not be set, and therefore you don't have
+     * an entry in the Hashtable at all. In other words, it's possible for you to get null for a property from the
      * resulted Hashtable.
      * @throws InvalidProperty
      * @throws RuntimeFault
@@ -71,7 +70,7 @@ public class PropertyCollectorUtil {
 
     public static Hashtable[] retrieveProperties(ManagedObject[] mos, String moType,
                                                  String[] propPaths) throws InvalidProperty,
-        RuntimeFault, RemoteException {
+            RuntimeFault, RemoteException {
         if (mos == null) {
             throw new IllegalArgumentException("Managed object array cannot be null.");
         }
@@ -93,7 +92,7 @@ public class PropertyCollectorUtil {
         pfs.setPropSet(new PropertySpec[]{pSpec});
 
         ObjectContent[] objs = pc.retrieveProperties(
-            new PropertyFilterSpec[]{pfs});
+                new PropertyFilterSpec[]{pfs});
 
         Hashtable[] pTables = new Hashtable[mos.length];
 
@@ -103,13 +102,13 @@ public class PropertyCollectorUtil {
 
             int index;
             if (mor.getType().equals(mos[i].getMOR().getType()) &&
-                mor.get_value().equals(mos[i].getMOR().get_value())) {
+                    mor.get_value().equals(mos[i].getMOR().get_value())) {
                 index = i;
-            }
-            else {
+            } else {
                 index = findIndex(mos, mor);
                 if (index == -1) {
-                    throw new RuntimeException("Unexpected managed object in result: " + mor.getType() + ":" + mor.get_value());
+                    throw new RuntimeException(
+                            "Unexpected managed object in result: " + mor.getType() + ":" + mor.get_value());
                 }
             }
             pTables[index] = new Hashtable();
@@ -131,7 +130,7 @@ public class PropertyCollectorUtil {
     private static int findIndex(ManagedObject[] mos, ManagedObjectReference mor) {
         for (int i = 0; i < mos.length; i++) {
             if (mor.getType().equals(mos[i].getMOR().getType()) &&
-                mor.get_value().equals(mos[i].getMOR().get_value())) {
+                    mor.get_value().equals(mos[i].getMOR().get_value())) {
                 return i;
             }
         }
@@ -139,9 +138,8 @@ public class PropertyCollectorUtil {
     }
 
     /**
-     * Method to convert an object to its type
-     * For example when ArrayOfManagedObject is passed in
-     * return a ManagedObject[]
+     * Method to convert an object to its type For example when ArrayOfManagedObject is passed in return a
+     * ManagedObject[]
      *
      * @param dynaPropVal
      * @return
@@ -162,21 +160,18 @@ public class PropertyCollectorUtil {
                 Method getMethod;
                 try {
                     getMethod = propClass.getMethod("get" + methodName, (Class[]) null);
-                }
-                catch (NoSuchMethodException ignore) {
+                } catch (NoSuchMethodException ignore) {
                     getMethod = propClass.getMethod("get_" + methodName.toLowerCase(), (Class[]) null);
                 }
                 propertyValue = getMethod.invoke(dynaPropVal, (Object[]) null);
-            }
-            catch (Exception e) {
-                log.error("Exception caught trying to convertProperty", e);
+            } catch (Exception e) {
+                Logger.error("VMWareAPI", "Exception caught trying to convertProperty. " + e.getMessage());
             }
         }
         //Handle the case of an unwrapped array being deserialized.
         else if (dynaPropVal.getClass().isArray()) {
             propertyValue = dynaPropVal;
-        }
-        else {
+        } else {
             propertyValue = dynaPropVal;
         }
 
@@ -194,7 +189,8 @@ public class PropertyCollectorUtil {
     public static PropertySpec createPropertySpec(String type, boolean allProp, String[] pathSet) {
         PropertySpec pSpec = new PropertySpec();
         pSpec.setType(type);
-        pSpec.setAll(allProp); //whether or not all properties of the object are read. If this property is set to true, the pathSet property is ignored.
+        pSpec.setAll(
+                allProp); //whether or not all properties of the object are read. If this property is set to true, the pathSet property is ignored.
         pSpec.setPathSet(pathSet);
         return pSpec;
     }
@@ -223,8 +219,7 @@ public class PropertyCollectorUtil {
     }
 
     /**
-     * This code takes an array of [typename, property, property, ...]
-     * and converts it into a PropertySpec[].
+     * This code takes an array of [typename, property, property, ...] and converts it into a PropertySpec[].
      *
      * @param typeProplists 2D array of type and properties to retrieve
      * @return Array of container filter specs
@@ -244,11 +239,9 @@ public class PropertyCollectorUtil {
     }
 
     /**
-     * This method creates a SelectionSpec[] to traverses the entire
-     * inventory tree starting at a Folder
-     * NOTE: This full traversal is based on VC2/ESX3 inventory structure.
-     * It does not search new ManagedEntities like Network, DVS, etc.
-     * If you want a full traversal with VC4/ESX4, use buildFullTraversalV4().
+     * This method creates a SelectionSpec[] to traverses the entire inventory tree starting at a Folder NOTE: This full
+     * traversal is based on VC2/ESX3 inventory structure. It does not search new ManagedEntities like Network, DVS,
+     * etc. If you want a full traversal with VC4/ESX4, use buildFullTraversalV4().
      *
      * @return The SelectionSpec[]
      */
@@ -257,8 +250,10 @@ public class PropertyCollectorUtil {
 
         // Recurse through the folders
         TraversalSpec visitFolders = createTraversalSpec("visitFolders",
-            "Folder", "childEntity",
-            new String[]{"visitFolders", "dcToHf", "dcToVmf", "crToH", "crToRp", "HToVm", "rpToVm"});
+                                                         "Folder", "childEntity",
+                                                         new String[]{"visitFolders", "dcToHf", "dcToVmf", "crToH",
+                                                                 "crToRp", "HToVm", "rpToVm"}
+        );
 
         SelectionSpec[] sSpecs = new SelectionSpec[tSpecs.size() + 1];
         sSpecs[0] = visitFolders;
@@ -277,44 +272,50 @@ public class PropertyCollectorUtil {
     private static List<TraversalSpec> buildFullTraversalV2NoFolder() {
         // Recurse through all ResourcePools
         TraversalSpec rpToRp = createTraversalSpec("rpToRp",
-            "ResourcePool", "resourcePool",
-            new String[]{"rpToRp", "rpToVm"});
+                                                   "ResourcePool", "resourcePool",
+                                                   new String[]{"rpToRp", "rpToVm"}
+        );
 
         // Recurse through all ResourcePools
         TraversalSpec rpToVm = createTraversalSpec("rpToVm",
-            "ResourcePool", "vm",
-            new SelectionSpec[]{});
+                                                   "ResourcePool", "vm",
+                                                   new SelectionSpec[]{}
+        );
 
         // Traversal through ResourcePool branch
         TraversalSpec crToRp = createTraversalSpec("crToRp",
-            "ComputeResource", "resourcePool",
-            new String[]{"rpToRp", "rpToVm"});
+                                                   "ComputeResource", "resourcePool",
+                                                   new String[]{"rpToRp", "rpToVm"}
+        );
 
         // Traversal through host branch
         TraversalSpec crToH = createTraversalSpec("crToH",
-            "ComputeResource", "host",
-            new SelectionSpec[]{});
+                                                  "ComputeResource", "host",
+                                                  new SelectionSpec[]{}
+        );
 
         // Traversal through hostFolder branch
         TraversalSpec dcToHf = createTraversalSpec("dcToHf",
-            "Datacenter", "hostFolder",
-            new String[]{"visitFolders"});
+                                                   "Datacenter", "hostFolder",
+                                                   new String[]{"visitFolders"}
+        );
 
         // Traversal through vmFolder branch
         TraversalSpec dcToVmf = createTraversalSpec("dcToVmf",
-            "Datacenter", "vmFolder",
-            new String[]{"visitFolders"});
+                                                    "Datacenter", "vmFolder",
+                                                    new String[]{"visitFolders"}
+        );
 
         TraversalSpec HToVm = createTraversalSpec("HToVm",
-            "HostSystem", "vm",
-            new String[]{"visitFolders"});
+                                                  "HostSystem", "vm",
+                                                  new String[]{"visitFolders"}
+        );
 
         return Arrays.asList(dcToVmf, dcToHf, crToH, crToRp, rpToRp, HToVm, rpToVm);
     }
 
     /**
-     * This method creates a SelectionSpec[] to traverses the entire
-     * inventory tree starting at a Folder
+     * This method creates a SelectionSpec[] to traverses the entire inventory tree starting at a Folder
      *
      * @return The SelectionSpec[]
      */
@@ -322,12 +323,14 @@ public class PropertyCollectorUtil {
         List<TraversalSpec> tSpecs = buildFullTraversalV2NoFolder();
 
         TraversalSpec dcToDs = createTraversalSpec("dcToDs",
-            "Datacenter", "datastoreFolder",
-            new String[]{"visitFolders"});
+                                                   "Datacenter", "datastoreFolder",
+                                                   new String[]{"visitFolders"}
+        );
 
         TraversalSpec vAppToRp = createTraversalSpec("vAppToRp",
-            "VirtualApp", "resourcePool",
-            new String[]{"rpToRp", "vAppToRp"});
+                                                     "VirtualApp", "resourcePool",
+                                                     new String[]{"rpToRp", "vAppToRp"}
+        );
 
         /**
          * Copyright 2009 Altor Networks, contribution by Elsa Bignoli
@@ -335,13 +338,16 @@ public class PropertyCollectorUtil {
          */
         // Traversal through netFolder branch
         TraversalSpec dcToNetf = createTraversalSpec("dcToNetf",
-            "Datacenter", "networkFolder",
-            new String[]{"visitFolders"});
+                                                     "Datacenter", "networkFolder",
+                                                     new String[]{"visitFolders"}
+        );
 
         // Recurse through the folders
         TraversalSpec visitFolders = createTraversalSpec("visitFolders",
-            "Folder", "childEntity",
-            new String[]{"visitFolders", "dcToHf", "dcToVmf", "dcToDs", "dcToNetf", "crToH", "crToRp", "HToVm", "rpToVm"});
+                                                         "Folder", "childEntity",
+                                                         new String[]{"visitFolders", "dcToHf", "dcToVmf", "dcToDs",
+                                                                 "dcToNetf", "crToH", "crToRp", "HToVm", "rpToVm"}
+        );
 
         SelectionSpec[] sSpecs = new SelectionSpec[tSpecs.size() + 4];
         sSpecs[0] = visitFolders;

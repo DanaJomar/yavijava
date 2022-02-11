@@ -31,7 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package com.vmware.vim25.ws;
 
-import org.apache.log4j.Logger;
+import com.vmware.vim25.util.log.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLPeerUnverifiedException;
@@ -55,8 +55,6 @@ import java.security.cert.X509Certificate;
  */
 
 public class WSClient extends SoapClient {
-
-    private static final Logger log = Logger.getLogger(WSClient.class);
     private final SSLSocketFactory sslSocketFactory;
 
     private XmlGen xmlGen = new XmlGenDom();
@@ -69,49 +67,50 @@ public class WSClient extends SoapClient {
         this(serverUrl, ignoreCert, null);
     }
 
-    public WSClient(String serverUrl, boolean ignoreCert, TrustManager trustManager) throws MalformedURLException, RemoteException {
-        if(ignoreCert && trustManager != null) {
-            log.warn("The option to ignore certs has been set along with a provided trust manager. This is not a valid scenario and the trust manager will be ignored.");
+    public WSClient(String serverUrl, boolean ignoreCert, TrustManager trustManager)
+            throws MalformedURLException, RemoteException {
+        if (ignoreCert && trustManager != null) {
+            Logger.warning(
+                    "VMWareAPI",
+                    "The option to ignore certs has been set along with a provided trust manager. This is not a valid scenario and the trust manager will be ignored."
+            );
         }
 
         if (serverUrl.endsWith("/")) {
             serverUrl = serverUrl.substring(0, serverUrl.length() - 1);
         }
-        log.trace("Creating WSClient to server URL: " + serverUrl);
-        log.trace("Ignore ssl: " + ignoreCert);
+//        Logger.debug("VMWareAPI", "Creating WSClient to server URL: " + serverUrl);
+//        Logger.debug("VMWareAPI", "Ignore ssl: " + ignoreCert);
 
         this.trustManager = trustManager;
         this.baseUrl = new URL(serverUrl);
-        this.sslSocketFactory = ignoreCert ? getTrustAllSocketFactory(true) : getCustomTrustManagerSocketFactory(trustManager);
+        this.sslSocketFactory =
+                ignoreCert ? getTrustAllSocketFactory(true) : getCustomTrustManagerSocketFactory(trustManager);
     }
 
     public Object invoke(String methodName, Argument[] paras, String returnType) throws RemoteException {
-        log.trace("Invoking method: " + methodName);
+//        Logger.debug("VMWareAPI", "Invoking method: " + methodName);
         String soapMsg = marshall(methodName, paras);
 
         InputStream is = null;
         try {
             is = post(soapMsg);
-            log.trace("Converting xml response from server to: " + returnType);
+//            Logger.debug("VMWareAPI", "Converting xml response from server to: " + returnType);
             return unMarshall(returnType, is);
-        }
-        catch (Exception e1) {
-            log.error("Exception caught while invoking method: " + methodName, e1);
+        } catch (Exception e1) {
+            Logger.error("VMWareAPI", "Exception caught while invoking method: " + methodName + ". " + e1.getMessage());
             // Fixes issue-28 still need to write a test which may require
             // further refacotring but this at least gets the InvalidLogin working.
             try {
                 throw (RemoteException) e1;
-            }
-            catch (ClassCastException ignore) {
+            } catch (ClassCastException ignore) {
                 throw new RemoteException("Exception caught trying to invoke method " + methodName, e1);
             }
-        }
-        finally {
+        } finally {
             if (is != null) {
                 try {
                     is.close();
-                }
-                catch (IOException ignored) {
+                } catch (IOException ignored) {
                 }
             }
         }
@@ -123,8 +122,7 @@ public class WSClient extends SoapClient {
         try {
             InputStream is = post(soapMsg);
             return readStream(is);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RemoteException("VI SDK invoke exception:" + e);
         }
     }
@@ -135,8 +133,8 @@ public class WSClient extends SoapClient {
             ((HttpsURLConnection) postCon).setSSLSocketFactory(sslSocketFactory);
         }
 
-        log.trace("POST: " + soapAction);
-        log.trace("Payload: " + soapMsg);
+//        Logger.debug("VMWareAPI", "POST: " + soapAction);
+//         Logger.debug("VMWareAPI", "Payload: " + soapMsg);
         if (connectTimeout > 0) {
             postCon.setConnectTimeout(connectTimeout);
         }
@@ -146,9 +144,8 @@ public class WSClient extends SoapClient {
 
         try {
             postCon.setRequestMethod("POST");
-        }
-        catch (ProtocolException e) {
-            log.debug("ProtocolException caught.", e);
+        } catch (ProtocolException e) {
+            Logger.debug("VMWareAPI", "ProtocolException caught. " + e.getMessage());
         }
 
         postCon.setDoOutput(true);
@@ -161,7 +158,7 @@ public class WSClient extends SoapClient {
         postCon.setRequestProperty("Content-Type", "text/xml; charset=utf-8");
 
         if (cookie != null) {
-            log.trace("Setting Cookie.");
+//            Logger.debug("VMWareAPI", "Setting Cookie.");
             postCon.setRequestProperty("Cookie", cookie);
         }
 
@@ -175,20 +172,19 @@ public class WSClient extends SoapClient {
 
         if (cookie == null) {
             cookie = postCon.getHeaderField("Set-Cookie");
-            log.trace("Cookie was null. Fetching Set-Cookie header to get new Cookie.");
+//            Logger.debug("VMWareAPI", "Cookie was null. Fetching Set-Cookie header to get new Cookie.");
         }
         return is;
     }
 
-    protected InputStream getInputStreamFromConnection(HttpURLConnection postCon) throws RemoteException{
+    protected InputStream getInputStreamFromConnection(HttpURLConnection postCon) throws RemoteException {
         InputStream is;
 
         try {
             is = postCon.getInputStream();
-            log.trace("Successfully fetched InputStream.");
-        }
-        catch (IOException ioe) {
-            log.debug("Caught an IOException. Reading ErrorStream for results.", ioe);
+//            Logger.debug("VMWareAPI", "Successfully fetched InputStream.");
+        } catch (IOException ioe) {
+            Logger.debug("VMWareAPI", "Caught an IOException. Reading ErrorStream for results. " + ioe.getMessage());
             InputStream errorStream = postCon.getErrorStream();
 
             // check if there is an error stream available
@@ -197,21 +193,24 @@ public class WSClient extends SoapClient {
                 is = errorStream;
             } else {
                 // if there is no error stream available, wrap the IOException to give meaningful error
-                throw new RemoteException(MessageFormat.format("An error occurred getting a response from the connection at url {0}", baseUrl), ioe);
+                throw new RemoteException(MessageFormat
+                                                  .format(
+                                                          "An error occurred getting a response from the connection at url {0}",
+                                                          baseUrl
+                                                  ), ioe);
             }
         }
 
         if (thumbprint == null && postCon instanceof HttpsURLConnection) {
             try {
-                Certificate[] certs = ((HttpsURLConnection)postCon).getServerCertificates();
+                Certificate[] certs = ((HttpsURLConnection) postCon).getServerCertificates();
                 for (int i = 0; thumbprint == null && i < certs.length; i++) {
                     if (certs[i] instanceof X509Certificate) {
                         setServerThumbprint(computeX509CertificateThumbprint((X509Certificate) certs[i]));
                     }
                 }
-            }
-            catch (SSLPeerUnverifiedException e) {
-                log.debug("SSLPeerUnverifiedException caught.", e);
+            } catch (SSLPeerUnverifiedException e) {
+                Logger.debug("VMWareAPI", "SSLPeerUnverifiedException caught. " + e.getMessage());
             }
         }
         return is;
