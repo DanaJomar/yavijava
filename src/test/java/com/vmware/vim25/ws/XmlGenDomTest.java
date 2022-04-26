@@ -1,6 +1,7 @@
 package com.vmware.vim25.ws;
 
 import com.vmware.vim25.*;
+import com.vmware.vim25.util.log.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -50,6 +51,7 @@ public class XmlGenDomTest {
 
     @Test
     public void set_Detail_Message_throws_Exception() throws Exception {
+        Logger.disable();
         SecurityManager previous = System.getSecurityManager();
         try {
             SecurityManager securityManager = new SecurityManager() {

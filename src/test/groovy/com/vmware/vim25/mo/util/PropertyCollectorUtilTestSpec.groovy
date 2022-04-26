@@ -5,6 +5,7 @@ import com.vmware.vim25.ManagedObjectReference
 import com.vmware.vim25.ObjectSpec
 import com.vmware.vim25.SelectionSpec
 import com.vmware.vim25.util.log.Logger
+import groovy.mock.interceptor.StubFor
 import spock.lang.Specification
 
 
@@ -79,15 +80,22 @@ class PropertyCollectorUtilTestSpec extends Specification {
     class ArrayOfBad {}
 
     def "ConvertProperty when passed an ArrayOfBad returns null and logger is called"() {
-        setup:
-        def log = Mock(Logger)
-        ArrayOfBad bad = new ArrayOfBad()
-        propertyCollectorUtil.log = log
-        when:
-        Object thing = propertyCollectorUtil.convertProperty(bad)
-        then:
-        thing == null
-        1 * log.error("Exception caught trying to convertProperty",*_)
+        def mockSimpleDateFormat = new StubFor(SimpleDateFormat)
+        mockSimpleDateFormat.demand.parse(1..1) { String s ->
+            (new Date() + 1)
+        }
+        mockSimpleDateFormat.use {
+            setup:
+            def log = GroovyMock(Logger)
+            ArrayOfBad bad = new ArrayOfBad()
+
+            //propertyCollectorUtil.log = log
+            when:
+            Object thing = propertyCollectorUtil.convertProperty(bad)
+            then:
+            thing == null
+            1 * log.error("VMWareAPI", "Exception caught trying to convertProperty. ");
+        }
     }
 
     def "CreatObjectSpec returns valid objectspec"() {

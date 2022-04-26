@@ -2,6 +2,8 @@ package com.vmware.vim25.ws
 
 import com.vmware.vim25.InvalidLogin
 import com.vmware.vim25.ManagedObjectReference
+import com.vmware.vim25.util.log.Logger
+import groovy.mock.interceptor.StubFor
 import spock.lang.Specification
 
 import java.rmi.RemoteException
@@ -26,10 +28,12 @@ import static groovy.test.GroovyAssert.shouldFail
 class WSClientSpec extends Specification {
 
     def 'test Login fails with InvalidLogin when invalid info is used'() {
+
         setup:
+        Logger.disable();
         InputStream inputStream = new FileInputStream(new File("src/test/java/com/vmware/vim25/ws/xml/InvalidLoginFault.xml"))
 
-        WSClient wsClient = Spy(WSClient,constructorArgs:["https://foo.com/sdk", true]) {post(*_) >> inputStream}
+        WSClient wsClient = Spy(WSClient, constructorArgs: ["https://foo.com/sdk", true]) { post(*_) >> inputStream }
         ManagedObjectReference managedObjectReference = new ManagedObjectReference()
         managedObjectReference.setType("UserSession")
         managedObjectReference.val = "user-123"
@@ -41,25 +45,29 @@ class WSClientSpec extends Specification {
         paras[3] = new Argument("locale", "String", null)
 
         when:
-
         wsClient.invoke("Login", paras, "UserSession")
-
         then:
         thrown(InvalidLogin)
     }
 
     def 'test IOException Handling during getInputStream'() {
-        setup:
-        TestIOExceptionNullErrorStream connect = new TestIOExceptionNullErrorStream();
-        TestIOExceptionWithErrorStream connect2 = new TestIOExceptionWithErrorStream();
-        WSClient wsClient = new WSClient("https://foo.com/sdk", true)
+        def mockSimpleDateFormat = new StubFor(SimpleDateFormat)
+        mockSimpleDateFormat.demand.parse(1..1) { String s ->
+            (new Date() + 1)
+        }
+        mockSimpleDateFormat.use {
+            setup:
+            TestIOExceptionNullErrorStream connect = new TestIOExceptionNullErrorStream();
+            TestIOExceptionWithErrorStream connect2 = new TestIOExceptionWithErrorStream();
+            WSClient wsClient = new WSClient("https://foo.com/sdk", true)
 
-        when:
-        String message = shouldFail RemoteException, {wsClient.getInputStreamFromConnection(connect)}
-        String message2 = new InputStreamReader(wsClient.getInputStreamFromConnection(connect2)).readLine();
+            when:
+            String message = shouldFail RemoteException, { wsClient.getInputStreamFromConnection(connect) }
+            String message2 = new InputStreamReader(wsClient.getInputStreamFromConnection(connect2)).readLine();
 
-        then:
-        message.contains("An error occurred getting a response from the connection at url https://foo.com/sdk; nested exception is: ")
-        message2.contains("There was an error retrieving the InputStream")
+            then:
+            message.contains("An error occurred getting a response from the connection at url https://foo.com/sdk; nested exception is: ")
+            message2.contains("There was an error retrieving the InputStream")
+        }
     }
 }
