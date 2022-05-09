@@ -11,7 +11,7 @@ jdk:
 dist: trusty
 
 script:
-  - gradle test
+  - mvn test
 
 install:
   - /bin/true
