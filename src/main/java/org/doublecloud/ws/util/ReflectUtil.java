@@ -29,14 +29,14 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package org.doublecloud.ws.util;
 
+import jakarta.xml.bind.DatatypeConverter;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
-
-import javax.xml.bind.DatatypeConverter;
 
 public class ReflectUtil {
 

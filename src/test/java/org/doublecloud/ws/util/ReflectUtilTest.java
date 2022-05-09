@@ -49,7 +49,7 @@ public class ReflectUtilTest {
             values.add(Character.toString(c));
         }
         byte[] actual = ReflectUtil.toByteArray(values);
-        byte[] expected = javax.xml.bind.DatatypeConverter.parseBase64Binary("ox991LwhCGLf2gntXqKkSPdqC+A=");
+        byte[] expected = jakarta.xml.bind.DatatypeConverter.parseBase64Binary("ox991LwhCGLf2gntXqKkSPdqC+A=");
         assertArrayEquals(expected, actual);
     }
 

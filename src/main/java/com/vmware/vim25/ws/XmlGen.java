@@ -33,11 +33,11 @@ package com.vmware.vim25.ws;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.mo.util.MorUtil;
 import com.vmware.vim25.util.log.Logger;
+import jakarta.xml.bind.DatatypeConverter;
 import org.doublecloud.ws.util.ReflectUtil;
 import org.doublecloud.ws.util.TypeUtil;
 import org.doublecloud.ws.util.XmlUtil;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -148,7 +148,8 @@ public abstract class XmlGen {
             sb.append("<").append(tagName).append(">").append(obj).append("</").append(tagName).append(">");
         }
         else if (obj instanceof Calendar) {
-            sb.append("<").append(tagName).append(" xsi:type=\"xsd:dateTime\">").append(DatatypeConverter.printDateTime((Calendar) obj)).append("</").append(tagName).append(">");
+            sb.append("<").append(tagName).append(" xsi:type=\"xsd:dateTime\">").append(
+                    DatatypeConverter.printDateTime((Calendar) obj)).append("</").append(tagName).append(">");
         }
         else { // VIM type
             if (clazz == type) {
